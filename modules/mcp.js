@@ -57,10 +57,10 @@ class JewelAssistClient {
       // 默认使用streamablehttp
       console.log("try to connect", this.streamableHttpUrl);
       return new StreamableHTTPClientTransport(this.streamableHttpUrl, {
-        timeout: DEFAULT_MCP_TIMEOUT * 3,  // 增加到3倍默认超时时间
+        timeout: DEFAULT_MCP_TIMEOUT * 3, // 增加到3倍默认超时时间
         sse_read_timeout: DEFAULT_MCP_TIMEOUT * 3,
-        headersTimeout: DEFAULT_MCP_TIMEOUT * 2,  // 专门设置响应头超时
-        bodyTimeout: DEFAULT_MCP_TIMEOUT * 3,     // 设置响应体超时
+        headersTimeout: DEFAULT_MCP_TIMEOUT * 2, // 专门设置响应头超时
+        bodyTimeout: DEFAULT_MCP_TIMEOUT * 3, // 设置响应体超时
         maxReconnectionDelay: 600,
         maxRetries: 10,
       });
@@ -103,10 +103,11 @@ class JewelAssistClient {
    * @throws {Error} 当服务器忙、调用失败或超时时抛出错误
    */
   async callTool(toolName, args, onPartialResult = null, timeout = DEFAULT_MCP_TIMEOUT) {
-    // 检查客户端是否忙碌
-    if (JewelAssistClient.isBusy) {
-      throw new Error("服务器忙，请稍后重试");
-    }
+    // // 检查客户端是否忙碌
+    // if (JewelAssistClient.isBusy) {
+    //   throw new Error("服务器忙，请稍后重试");
+    // }
+    // JewelAssistClient.isBusy = true;
 
     // 每次重新连接，以刷新mcp
     await this.disconnect();
@@ -115,9 +116,6 @@ class JewelAssistClient {
     }
 
     try {
-      // 设置为忙碌状态
-      JewelAssistClient.isBusy = true;
-
       // 创建超时Promise
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => {
@@ -137,10 +135,10 @@ class JewelAssistClient {
           {
             timeout: timeout,
             onprogress: (progress) => {
-                // 如果用户提供了回调函数，调用它
-                if (onPartialResult && typeof onPartialResult === "function") {
-                  onPartialResult(progress);
-                }
+              // 如果用户提供了回调函数，调用它
+              if (onPartialResult && typeof onPartialResult === "function") {
+                onPartialResult(progress);
+              }
             },
           }
         ),
