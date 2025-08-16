@@ -1,30 +1,32 @@
 import 'dotenv/config';
 import express from 'express';
 import {
-  ButtonStyleTypes,
-  InteractionResponseFlags,
-  InteractionResponseType,
   InteractionType,
+  InteractionResponseType,
+  InteractionResponseFlags,
   MessageComponentTypes,
+  ButtonStyleTypes,
   verifyKeyMiddleware,
 } from 'discord-interactions';
 import { getRandomEmoji, DiscordRequest } from './utils.js';
 import { getShuffledOptions, getResult } from './game.js';
 
+// modules
+import { handleChallengeCommand, handleChallengeInteraction, activeGames } from './modules/challenge.js';
+import { handleDesignCommand } from './modules/design.js';
+
 // Create an express app
 const app = express();
 // Get port, or default to 3000
 const PORT = process.env.PORT || 3000;
-// To keep track of our active games
-const activeGames = {};
 
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
  * Parse request body and verifies incoming requests using discord-interactions package
  */
 app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
-  // Interaction id, type and data
-  const { id, type, data } = req.body;
+  // Interaction type and data
+  const { type, id, data } = req.body;
 
   /**
    * Handle verification requests
@@ -58,8 +60,29 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       });
     }
 
+    // "challenge" command
+    if (name === 'challenge' && id) {
+      return handleChallengeCommand(req, res);
+    }
+
+    // "design" command
+    if (name === 'design' && id) {
+      return handleDesignCommand(req, res);
+    }
+
     console.error(`unknown command: ${name}`);
     return res.status(400).json({ error: 'unknown command' });
+  }
+
+  /**
+   * Handle requests from interactive components
+   * See https://discord.com/developers/docs/components/using-message-components#using-message-components-with-interactions
+   */
+  if (type === InteractionType.MESSAGE_COMPONENT) {
+    // custom_id set in payload when sending message component
+    const componentId = data.custom_id;
+
+    return handleChallengeInteraction(req, res);
   }
 
   console.error('unknown interaction type', type);

@@ -44,6 +44,23 @@ const CHALLENGE_COMMAND = {
   contexts: [0, 2],
 };
 
-const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND];
+// Design command
+const DESIGN_COMMAND = {
+  name: 'design',
+  description: '请求设计物品',
+  options: [
+    {
+      type: 3,
+      name: 'prompt',
+      description: '设计提示',
+      required: true
+    }
+  ],
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+};
+
+const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND, DESIGN_COMMAND];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
