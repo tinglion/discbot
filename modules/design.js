@@ -83,13 +83,27 @@ export async function handleDesignCommand(req, res) {
     // });
 
     // 3. 发送最终结果
+    // 'C:\\Users\\Nexusera\\JewelAssist\\aid\\result\\6ccf8d1f-21ee-4e8b-90bd-525744b1f079.png' => 'https://b4hn1un.asmote.cn/jaresult/6ccf8d1f-21ee-4e8b-90bd-525744b1f079.png'
     const endpoint = `/webhooks/${applicationId}/${interactionToken}/messages/@original`;
+    // 修复Windows路径分隔符匹配问题
+    const img_url = parsedResult.replace(/.*result\\/g, "https://b4hn1un.asmote.cn/jaresult/");
     await DiscordRequest(endpoint, {
       method: "PATCH",
       body: {
         components: [],
         flags: 0,
-        content: `设计请求已处理: ${prompt}\n\n结果：${parsedResult}`,
+        content: `设计请求已处理: ${prompt}`,
+        // content: `设计请求已处理: ${prompt}\n\n结果：${img_url}`,
+        embeds: [
+          {
+            title: "设计结果",
+            description: `根据您的需求生成的设计: ${prompt}`,
+            image: {
+              url: img_url
+            },
+            color: 16711680 // 红色
+          }
+        ],
         // components: [
         //   {
         //     type: MessageComponentTypes.ACTION_ROW,
